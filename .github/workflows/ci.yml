@@ -1,4 +1,5 @@
 # .github/workflows/ci.yml
+
 name: CI Pipeline
 
 on:
@@ -33,7 +34,7 @@ jobs:
 
       # Cache Composer dependencies to speed up workflow
       - name: Cache Composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -47,4 +48,3 @@ jobs:
       # Run Laravel linting (optional, if using any linter like PHP_CodeSniffer or PHPStan)
       - name: Run PHP_CodeSniffer (Optional)
         run: vendor/bin/phpcs --standard=PSR2 app/ tests/
-
