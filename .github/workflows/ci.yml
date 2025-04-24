@@ -1,0 +1,50 @@
+# .github/workflows/ci.yml
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  laravel-setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up PHP with the necessary version
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, bcmath, xml, pdo, curl
+
+      # Install Composer dependencies
+      - name: Install Composer dependencies
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          php composer.phar install --no-interaction --prefer-dist --optimize-autoloader
+
+      # Cache Composer dependencies to speed up workflow
+      - name: Cache Composer dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      # Run PHPUnit tests
+      - name: Run PHPUnit tests
+        run: php artisan test --no-interaction
+
+      # Run Laravel linting (optional, if using any linter like PHP_CodeSniffer or PHPStan)
+      - name: Run PHP_CodeSniffer (Optional)
+        run: vendor/bin/phpcs --standard=PSR2 app/ tests/
+
