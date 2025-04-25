@@ -1,5 +1,3 @@
-# .github/workflows/ci.yml
-
 name: CI Pipeline
 
 on:
@@ -19,18 +17,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Set up PHP with the necessary version
+      # Set up PHP with the necessary version and extensions
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
           extensions: mbstring, bcmath, xml, pdo, curl
 
+      # Install Composer globally
+      - name: Install Composer
+        run: |
+          curl -sS https://getcomposer.org/installer | php
+          sudo mv composer.phar /usr/local/bin/composer
+
       # Install Composer dependencies
       - name: Install Composer dependencies
         run: |
-          curl -sS https://getcomposer.org/installer | php
-          php composer.phar install --prefer-dist --optimize-autoloader
+          composer install --no-interaction --prefer-dist --optimize-autoloader
 
       # Cache Composer dependencies to speed up workflow
       - name: Cache Composer dependencies
@@ -40,6 +43,11 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+
+      # Run Laravel Artisan to clear cache and optimize (Optional)
+      - name: Laravel Cache Clear and Optimize
+        run: |
+          php artisan optimize
 
       # Run Laravel Linting (Optional)
       - name: Run PHP_CodeSniffer (Optional)
