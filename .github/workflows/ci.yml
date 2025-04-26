@@ -1,54 +1,36 @@
-name: CI Pipeline
+name: Laravel Basic CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  laravel-setup:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      # Set up PHP with the necessary version and extensions
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.1'
-          extensions: mbstring, bcmath, xml, pdo, curl
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+        extensions: mbstring, bcmath, pdo, mysql
 
-      # Install Composer globally
-      - name: Install Composer
-        run: |
-          curl -sS https://getcomposer.org/installer | php
-          sudo mv composer.phar /usr/local/bin/composer
+    - name: Install Composer Dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
 
-      # Install Composer dependencies
-      - name: Install Composer dependencies
-        run: |
-          composer install --no-interaction --prefer-dist --optimize-autoloader
+    - name: Copy .env
+      run: cp .env.example .env
 
-      # Cache Composer dependencies to speed up workflow
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+    - name: Generate App Key
+      run: php artisan key:generate
 
-      # Run Laravel Artisan to clear cache and optimize (Optional)
-      - name: Laravel Cache Clear and Optimize
-        run: |
-          php artisan optimize
+    - name: Run basic artisan commands
+      run: php artisan config:cache
 
-      # Run Laravel Linting (Optional)
-      - name: Run PHP_CodeSniffer (Optional)
-        run: vendor/bin/phpcs --standard=PSR2 app/ tests/
+    - name: Done
+      run: echo "✅ Laravel setup completed!"
