@@ -11,26 +11,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      # Checkout the code
+      - name: 🔄 Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.1'
-        extensions: mbstring, bcmath, pdo, mysql
+      # Setup PHP environment
+      - name: 🧰 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, bcmath, pdo, mysql
+          coverage: none
 
-    - name: Install Composer Dependencies
-      run: composer install --prefer-dist --no-progress --no-suggest
+      # Install Composer dependencies
+      - name: 📦 Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
 
-    - name: Copy .env
-      run: cp .env.example .env
+      # Copy .env file
+      - name: 📄 Copy .env
+        run: cp .env.example .env
 
-    - name: Generate App Key
-      run: php artisan key:generate
+      # Generate application key
+      - name: 🔐 Generate App Key
+        run: php artisan key:generate
 
-    - name: Run basic artisan commands
-      run: php artisan config:cache
+      # Cache configuration
+      - name: ⚙️ Run artisan config cache
+        run: php artisan config:cache
 
-    - name: Done
-      run: echo "✅ Laravel setup completed!"
+      # Final message
+      - name: ✅ Done
+        run: echo "🎉 Laravel setup completed successfully!"
